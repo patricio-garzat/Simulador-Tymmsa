@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador Financiero — Tymmsa</title>
+<style>
+  :root{
+    --bg:#f5f6f8;
+    --bg-elevated:#ffffff;
+    --bg-subtle:#f0f1f4;
+    --text:#0f1420;
+    --text-secondary:#66707e;
+    --text-tertiary:#98a1ad;
+    --border:#e6e8ec;
+    --border-strong:#d7dae0;
+    --accent:#4f46e5;
+    --accent-hover:#4338ca;
+    --accent-soft:#eef0ff;
+    --good:#12875a;
+    --good-soft:#e6f6ef;
+    --warn:#b7791f;
+    --warn-soft:#fdf3e0;
+    --bad:#c0332b;
+    --bad-soft:#fbe9e8;
+    --shadow-sm:0 1px 2px rgba(15,20,32,0.04);
+    --shadow-md:0 4px 16px rgba(15,20,32,0.06);
+    --shadow-lg:0 12px 32px rgba(15,20,32,0.10);
+    --radius-sm:10px;
+    --radius-md:14px;
+    --radius-lg:20px;
+    --chart-grid:#e6e8ec;
+    --chart-text:#66707e;
+    --chart-primary:#4f46e5;
+    --chart-secondary:#98a1ad;
+    --chart-good:#12875a;
+    --chart-bad:#c0332b;
+    --chart-warn:#b7791f;
+    color-scheme:light;
+  }
+  :root[data-theme="dark"]{
+    --bg:#0a0c10;
+    --bg-elevated:#12151c;
+    --bg-subtle:#171b24;
+    --text:#eef0f4;
+    --text-secondary:#9aa3b2;
+    --text-tertiary:#6b7383;
+    --border:#232834;
+    --border-strong:#2e3543;
+    --accent:#7c74f5;
+    --accent-hover:#8e86ff;
+    --accent-soft:#1c1a3a;
+    --good:#3ecf8e;
+    --good-soft:#0f2a20;
+    --warn:#e3b04b;
+    --warn-soft:#2e2410;
+    --bad:#f0655c;
+    --bad-soft:#331715;
+    --shadow-sm:0 1px 2px rgba(0,0,0,0.3);
+    --shadow-md:0 4px 20px rgba(0,0,0,0.35);
+    --shadow-lg:0 16px 40px rgba(0,0,0,0.45);
+    --chart-grid:#232834;
+    --chart-text:#9aa3b2;
+    --chart-primary:#7c74f5;
+    --chart-secondary:#6b7383;
+    --chart-good:#3ecf8e;
+    --chart-bad:#f0655c;
+    --chart-warn:#e3b04b;
+    color-scheme:dark;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0a0c10;
+      --bg-elevated:#12151c;
+      --bg-subtle:#171b24;
+      --text:#eef0f4;
+      --text-secondary:#9aa3b2;
+      --text-tertiary:#6b7383;
+      --border:#232834;
+      --border-strong:#2e3543;
+      --accent:#7c74f5;
+      --accent-hover:#8e86ff;
+      --accent-soft:#1c1a3a;
+      --good:#3ecf8e;
+      --good-soft:#0f2a20;
+      --warn:#e3b04b;
+      --warn-soft:#2e2410;
+      --bad:#f0655c;
+      --bad-soft:#331715;
+      --shadow-sm:0 1px 2px rgba(0,0,0,0.3);
+      --shadow-md:0 4px 20px rgba(0,0,0,0.35);
+      --shadow-lg:0 16px 40px rgba(0,0,0,0.45);
+      --chart-grid:#232834;
+      --chart-text:#9aa3b2;
+      --chart-primary:#7c74f5;
+      --chart-secondary:#6b7383;
+      --chart-good:#3ecf8e;
+      --chart-bad:#f0655c;
+      --chart-warn:#e3b04b;
+      color-scheme:dark;
+    }
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+    transition:background .25s ease, color .25s ease;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:20px 20px 80px;}
+  @media (min-width:720px){ .wrap{padding:32px 32px 100px;} }
+
+  a{color:inherit;}
+  h1,h2,h3,h4{margin:0;}
+  p{margin:0;}
+
+  /* ---------- Header ---------- */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:12px;margin-bottom:28px;flex-wrap:wrap;
+  }
+  .brand{display:flex;flex-direction:column;gap:2px;}
+  .brand-mark{
+    font-size:13px;font-weight:700;letter-spacing:.14em;color:var(--accent);
+    text-transform:uppercase;
+  }
+  .brand-title{font-size:26px;font-weight:650;letter-spacing:-.01em;}
+  .brand-sub{font-size:14px;color:var(--text-secondary);margin-top:2px;}
+  .topbar-controls{display:flex;align-items:center;gap:10px;}
+
+  select, .select{
+    appearance:none;-webkit-appearance:none;
+    background:var(--bg-elevated);
+    border:1px solid var(--border);
+    color:var(--text);
+    border-radius:10px;
+    padding:9px 34px 9px 14px;
+    font-size:14px;font-weight:500;
+    cursor:pointer;
+    box-shadow:var(--shadow-sm);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2398a1ad'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 14px center;
+    transition:border-color .15s ease;
+  }
+  select:hover{border-color:var(--border-strong);}
+  select:focus{outline:none;border-color:var(--accent);}
+
+  .icon-btn{
+    width:38px;height:38px;border-radius:10px;
+    border:1px solid var(--border);
+    background:var(--bg-elevated);
+    color:var(--text);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;box-shadow:var(--shadow-sm);
+    transition:border-color .15s ease, transform .1s ease;
+  }
+  .icon-btn:hover{border-color:var(--border-strong);}
+  .icon-btn:active{transform:scale(.94);}
+  .icon-btn svg{width:18px;height:18px;}
+
+  .disclaimer-bar{
+    font-size:12.5px;color:var(--text-secondary);
+    background:var(--bg-subtle);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:11px 16px;
+    margin-bottom:28px;
+    display:flex;gap:8px;align-items:flex-start;
+  }
+  .disclaimer-bar svg{flex-shrink:0;width:15px;height:15px;margin-top:1.5px;opacity:.7;}
+
+  /* ---------- Sections ---------- */
+  section.block{margin-bottom:40px;}
+  .block-head{margin-bottom:16px;}
+  .block-title{font-size:19px;font-weight:650;letter-spacing:-.01em;}
+  .block-sub{font-size:13.5px;color:var(--text-secondary);margin-top:4px;max-width:640px;}
+  .block-head-row{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+
+  .card{
+    background:var(--bg-elevated);
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+    box-shadow:var(--shadow-sm);
+  }
+
+  /* ---------- Dashboard KPI grid ---------- */
+  .kpi-grid{
+    display:grid;grid-template-columns:repeat(2,1fr);gap:12px;
+  }
+  @media (min-width:640px){ .kpi-grid{grid-template-columns:repeat(3,1fr);} }
+  @media (min-width:980px){ .kpi-grid{grid-template-columns:repeat(6,1fr);} }
+  .kpi-card{
+    padding:18px 16px;display:flex;flex-direction:column;gap:6px;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .kpi-card:hover{box-shadow:var(--shadow-md);}
+  .kpi-label{font-size:12.5px;color:var(--text-secondary);font-weight:600;letter-spacing:.01em;}
+  .kpi-value{font-size:21px;font-weight:650;letter-spacing:-.01em;line-height:1.15;}
+  .kpi-value.sm{font-size:18px;}
+  .kpi-note{font-size:11.5px;color:var(--text-tertiary);}
+  .kpi-value.good{color:var(--good);}
+  .kpi-value.bad{color:var(--bad);}
+  .kpi-value.warn{color:var(--warn);}
+
+  /* ---------- Health section ---------- */
+  .health-card{
+    padding:26px;display:flex;gap:22px;align-items:center;flex-wrap:wrap;
+  }
+  .health-dot{
+    width:64px;height:64px;border-radius:50%;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-size:28px;
+  }
+  .health-dot.green{background:var(--good-soft);}
+  .health-dot.yellow{background:var(--warn-soft);}
+  .health-dot.red{background:var(--bad-soft);}
+  .health-dot.none{background:var(--bg-subtle);}
+  .health-main{flex:1;min-width:220px;}
+  .health-label{font-size:22px;font-weight:650;margin-bottom:4px;}
+  .health-label.green{color:var(--good);}
+  .health-label.yellow{color:var(--warn);}
+  .health-label.red{color:var(--bad);}
+  .health-desc{font-size:14px;color:var(--text-secondary);max-width:520px;}
+  .health-foot{font-size:12px;color:var(--text-tertiary);margin-top:10px;}
+
+  /* ---------- Lists (cómo vamos / mejorar) ---------- */
+  .insight-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;}
+  .insight-item{
+    display:flex;gap:12px;align-items:flex-start;
+    padding:14px 16px;
+  }
+  .insight-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);margin-top:7px;flex-shrink:0;}
+  .insight-text{font-size:14.5px;color:var(--text);}
+
+  .improve-grid{display:grid;grid-template-columns:1fr;gap:12px;}
+  @media (min-width:760px){ .improve-grid{grid-template-columns:repeat(3,1fr);} }
+  .improve-card{padding:18px;display:flex;flex-direction:column;gap:8px;}
+  .improve-rank{
+    width:26px;height:26px;border-radius:8px;background:var(--accent-soft);color:var(--accent);
+    display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;
+  }
+  .improve-title{font-size:15px;font-weight:650;}
+  .improve-text{font-size:13.5px;color:var(--text-secondary);}
+
+  /* ---------- Table ---------- */
+  .table-scroll{
+    overflow-x:auto;border-radius:var(--radius-md);border:1px solid var(--border);
+    background:var(--bg-elevated);box-shadow:var(--shadow-sm);
+  }
+  table{border-collapse:collapse;width:100%;min-width:760px;}
+  thead th{
+    text-align:right;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;
+    color:var(--text-tertiary);font-weight:600;
+    padding:12px 14px;border-bottom:1px solid var(--border);
+    white-space:nowrap;
+  }
+  thead th:first-child, tbody td:first-child{text-align:left;}
+  tbody td{
+    padding:8px 10px;border-bottom:1px solid var(--border);
+    text-align:right;font-size:13.5px;white-space:nowrap;
+  }
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:var(--bg-subtle);}
+  .month-name{font-weight:600;font-size:13.5px;padding-left:14px !important;}
+  .computed-cell{color:var(--text-secondary);font-variant-numeric:tabular-nums;}
+  .computed-cell.total{color:var(--text);font-weight:650;}
+  td.pr{padding-right:14px !important;}
+
+  input[type="number"], input[type="text"]{
+    background:var(--bg-subtle);
+    border:1px solid transparent;
+    color:var(--text);
+    border-radius:8px;
+    padding:7px 9px;
+    font-size:13.5px;
+    width:100%;
+    text-align:right;
+    font-variant-numeric:tabular-nums;
+    transition:border-color .15s ease, background .15s ease;
+    font-family:inherit;
+  }
+  input[type="text"]{text-align:left;}
+  input[type="number"]{min-width:92px;}
+  input:hover{border-color:var(--border-strong);}
+  input:focus{outline:none;border-color:var(--accent);background:var(--bg-elevated);}
+  input::-webkit-outer-spin-button, input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+  input[type=number]{-moz-appearance:textfield;}
+
+  .notice{
+    font-size:13px;padding:11px 14px;border-radius:10px;margin-top:14px;
+    display:flex;gap:8px;align-items:center;
+  }
+  .notice.warn{background:var(--warn-soft);color:var(--warn);}
+  .notice.info{background:var(--accent-soft);color:var(--accent);}
+
+  /* ---------- Annual summary cards ---------- */
+  .summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px;}
+  @media (min-width:640px){ .summary-grid{grid-template-columns:repeat(3,1fr);} }
+  .summary-card{padding:16px;}
+  .summary-label{font-size:12px;color:var(--text-secondary);font-weight:600;margin-bottom:6px;}
+  .summary-value{font-size:18px;font-weight:650;}
+  .summary-sub{font-size:11.5px;color:var(--text-tertiary);margin-top:4px;}
+
+  /* ---------- Expenses ---------- */
+  .expense-row{
+    display:grid;grid-template-columns:1fr 140px 34px;gap:10px;align-items:center;
+    padding:9px 4px;border-bottom:1px solid var(--border);
+  }
+  .expense-row:last-child{border-bottom:none;}
+  .expense-head{
+    display:grid;grid-template-columns:1fr 140px 34px;gap:10px;
+    padding:0 4px 8px;font-size:11.5px;color:var(--text-tertiary);
+    text-transform:uppercase;letter-spacing:.04em;font-weight:600;
+  }
+  .remove-btn{
+    width:30px;height:30px;border-radius:8px;border:1px solid var(--border);
+    background:var(--bg-subtle);color:var(--text-secondary);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;
+    transition:background .15s ease, color .15s ease;
+  }
+  .remove-btn:hover{background:var(--bad-soft);color:var(--bad);border-color:transparent;}
+  .expenses-card{padding:16px;}
+  .expenses-foot{
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;
+    margin-top:14px;padding-top:14px;border-top:1px solid var(--border);
+  }
+  .expenses-total{display:flex;flex-direction:column;gap:2px;}
+  .expenses-total .lbl{font-size:12px;color:var(--text-secondary);font-weight:600;}
+  .expenses-total .val{font-size:17px;font-weight:650;}
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    border-radius:10px;padding:10px 18px;font-size:13.5px;font-weight:600;
+    cursor:pointer;border:1px solid transparent;
+    transition:transform .1s ease, opacity .15s ease, background .15s ease;
+    display:inline-flex;align-items:center;gap:6px;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-primary:hover{background:var(--accent-hover);}
+  .btn-ghost{background:var(--bg-subtle);color:var(--text);border-color:var(--border);}
+  .btn-ghost:hover{border-color:var(--border-strong);}
+  .btn-danger-ghost{background:transparent;color:var(--bad);border-color:var(--border);}
+  .btn-danger-ghost:hover{background:var(--bad-soft);border-color:transparent;}
+  .btn-sm{padding:7px 13px;font-size:12.5px;}
+
+  /* ---------- Assumptions ---------- */
+  .assump-grid{display:grid;grid-template-columns:1fr;gap:16px;}
+  @media (min-width:760px){ .assump-grid{grid-template-columns:repeat(3,1fr);} }
+  .assump-card{padding:18px;}
+  .assump-label{font-size:13.5px;font-weight:650;margin-bottom:4px;}
+  .assump-help{font-size:12.5px;color:var(--text-secondary);margin-bottom:12px;}
+  .assump-input-row{display:flex;align-items:center;gap:8px;}
+  .assump-input-row input[type=number]{text-align:left;font-size:16px;font-weight:650;padding:9px 10px;}
+  .unit{color:var(--text-tertiary);font-size:13px;font-weight:600;}
+  input[type=range]{
+    width:100%;accent-color:var(--accent);height:4px;margin-top:6px;
+  }
+  .range-value{font-size:22px;font-weight:650;margin-top:6px;}
+
+  /* ---------- Profit / Breakeven / Safety ---------- */
+  .two-col{display:grid;grid-template-columns:1fr;gap:16px;}
+  @media (min-width:900px){ .two-col{grid-template-columns:1.3fr 1fr;} }
+  .profit-card{padding:22px;}
+  .profit-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px;}
+  .profit-row:last-child{border-bottom:none;}
+  .profit-row .k{color:var(--text-secondary);}
+  .profit-row .v{font-weight:650;font-variant-numeric:tabular-nums;}
+  .profit-row.total .v{font-size:19px;}
+  .estimate-tag{
+    display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;
+    background:var(--warn-soft);color:var(--warn);padding:3px 9px;border-radius:20px;
+    text-transform:uppercase;letter-spacing:.03em;margin-bottom:14px;
+  }
+
+  .big-stat-card{padding:26px;display:flex;flex-direction:column;gap:8px;height:100%;}
+  .big-stat-label{font-size:13.5px;font-weight:650;color:var(--text-secondary);}
+  .big-stat-value{font-size:34px;font-weight:700;letter-spacing:-.02em;}
+  .big-stat-unit{font-size:14px;color:var(--text-tertiary);font-weight:600;}
+  .big-stat-desc{font-size:13px;color:var(--text-secondary);margin-top:6px;}
+
+  .stack-gap{display:flex;flex-direction:column;gap:16px;}
+
+  /* ---------- Chart ---------- */
+  .chart-card{padding:20px 20px 14px;}
+  .chart-wrap{position:relative;width:100%;}
+  canvas{display:block;width:100%;}
+  .chart-tooltip{
+    position:absolute;pointer-events:none;
+    background:var(--bg-elevated);border:1px solid var(--border);
+    border-radius:10px;padding:10px 12px;font-size:12.5px;
+    box-shadow:var(--shadow-lg);opacity:0;transition:opacity .1s ease;
+    z-index:5;min-width:170px;
+  }
+  .chart-tooltip .tt-title{font-weight:650;margin-bottom:6px;font-size:13px;}
+  .tt-row{display:flex;justify-content:space-between;gap:14px;padding:2px 0;}
+  .tt-row .k{display:flex;align-items:center;gap:6px;color:var(--text-secondary);}
+  .tt-swatch{width:8px;height:8px;border-radius:2px;}
+  .legend-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
+  .legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-secondary);}
+  .legend-swatch{width:10px;height:10px;border-radius:3px;}
+  .legend-swatch.line{width:14px;height:2px;border-radius:1px;}
+
+  /* ---------- Projection ---------- */
+  .proj-table-wrap{overflow-x:auto;}
+
+  /* ---------- Scenarios ---------- */
+  .scenario-grid{display:grid;grid-template-columns:1fr;gap:12px;}
+  @media (min-width:760px){ .scenario-grid{grid-template-columns:repeat(3,1fr);} }
+  .scenario-card{padding:18px;}
+  .scenario-name{font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text-secondary);margin-bottom:10px;}
+  .scenario-card.base{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);}
+  .scenario-card.base .scenario-name{color:var(--accent);}
+  .scenario-metric{margin-bottom:10px;}
+  .scenario-metric .lbl{font-size:11.5px;color:var(--text-tertiary);}
+  .scenario-metric .val{font-size:19px;font-weight:650;}
+  .scenario-growth{font-size:12px;color:var(--text-tertiary);margin-top:8px;}
+
+  /* ---------- Controls ---------- */
+  .controls-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;margin-top:8px;}
+
+  footer.app-footer{
+    text-align:center;font-size:12px;color:var(--text-tertiary);margin-top:50px;padding-top:20px;
+    border-top:1px solid var(--border);
+  }
+
+  @media (max-width:639px){
+    .brand-title{font-size:22px;}
+    .health-card{padding:20px;}
+    .big-stat-value{font-size:28px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="topbar">
+    <div class="brand">
+      <span class="brand-mark">TYMMSA</span>
+      <h1 class="brand-title">Simulador financiero y de crecimiento</h1>
+      <p class="brand-sub">Entiende cómo está funcionando tu negocio y qué necesitas mejorar.</p>
+    </div>
+    <div class="topbar-controls">
+      <select id="yearSelect" aria-label="Año"></select>
+      <button class="icon-btn" id="themeToggle" aria-label="Cambiar tema" title="Cambiar tema claro/oscuro">
+        <svg id="themeIconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg id="themeIconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="disclaimer-bar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+    <span>Esta herramienta es un simulador de apoyo a la toma de decisiones. No constituye contabilidad oficial ni asesoría fiscal. Los indicadores de salud son estimaciones orientativas basadas en los datos que captures.</span>
+  </div>
+
+  <!-- DASHBOARD -->
+  <section class="block">
+    <div class="block-head">
+      <h2 class="block-title">Resumen general</h2>
+      <p class="block-sub">Vista rápida del desempeño de Tymmsa con los datos capturados hasta ahora.</p>
+    </div>
+    <div class="kpi-grid" id="dashboardCards"></div>
+  </section>
+
+  <!-- HEALTH -->
+  <section class="block">
+    <div class="block-head">
+      <h2 class="block-title">Salud financiera de Tymmsa</h2>
+    </div>
+    <div class="card health-card">
+      <div class="health-dot" id="healthDot"></div>
+      <div class="health-main">
+        <div class="health-label" id="healthLabel"></div>
+        <p class="health-desc" id="healthDesc"></p>
+        <p class="health-foot">Indicador orientativo basado en los datos capturados. No representa un estándar contable oficial.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMO VAMOS -->
+  <section class="block">
+    <div class="block-head">
+      <h2 class="block-title">¿Cómo vamos?</h2>
+    </div>
+    <ul class="insight-list card" style="padding:6px;" id="howList"></ul>
+  </section>
+
+  <!-- QUE MEJORAR -->
+  <section class="block">
+    <div class="block-head">
+      <h2 class="block-title">¿Qué deberíamos mejorar?</h2>
+      <p class="block-sub">Hasta 3 recomendaciones prioritarias según tus números actuales.</p>
+    </div>
+    <div class="improve-grid" id="improveList"></div>
+  </section>
+
+  <!-- VENTAS MENSUALES -->
+  <section class="block">
+    <div class="block-head-row">
+      <div>
+        <h2 class="block-title">Ventas mensuales</h2>
+        <p class="block-sub">Captura tus ventas en MXN (con IVA incluido), en USD, y el tipo de cambio aproximado de cada mes.</p>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Mes</th>
+            <th>Ventas MXN (IVA inc.)</th>
+            <th>Ventas USD</th>
+            <th>Tipo de cambio</th>
+            <th>MXN sin IVA</th>
+            <th>USD → MXN</th>
+            <th class="pr">Ventas netas totales</th>
+          </tr>
+        </thead>
+        <tbody id="monthsBody"></tbody>
+      </table>
+    </div>
+    <div class="notice warn" id="capturedNotice" style="display:none;"></div>
+    <div class="summary-grid" id="annualSummary"></div>
+  </section>
+
+  <!-- GRAFICA MENSUAL -->
+  <section class="block">
+    <div class="block-head">
+      <h2 class="block-title">Gráfica mensual</h2>
+      <p class="block-sub">Ventas netas, gastos fijos, utilidad estimada y punto de equilibrio por mes.</p>
+    </div>
+    <div class="card chart-card">
+      <div class="chart-wrap" id="monthlyChartWrap">
+        <canvas id="monthlyChart" height="280"></canvas>
+        <div class="chart-tooltip" id="monthlyTooltip"></div>
+      </div>
+      <div class="legend-row">
+        <div class="legend-item"><span class="legend-swatch" style="background:var(--chart-primary)"></span>Ventas netas</div>
+        <div class="legend-item"><span class="legend-swatch line" style="background:var(--chart-good)"></span>Utilidad estimada</div>
+        <div class="legend-item"><span class="legend-swatch line" style="background:var(--chart-secondary)"></span>Gastos fijos</div>
+        <div class="legend-item"><span class="legend-swatch line" style="background:var(--chart-warn)"></span>Punto de equilibrio</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GASTOS FIJOS -->
+  <section class="block">
+    <div class="block-head">
+      <h2 class="block-title">Gastos fijos mensuales</h2>
+      <p class="block-sub">Agrega los gastos que el negocio tiene que cubrir independientemente del nivel de ventas.</p>
+    </div>
+    <div class="card expenses-card">
+      <div class="expense-head">
+        <span>Concepto</span><span>Monto mensual</span><span></span>
+      </div>
+      <div id="expensesList"></div>
+      <button class="btn btn-ghost btn-sm" id="addExpenseBtn" style="margin-top:12px;">+ Agregar gasto</button>
+      <div class="expenses-foot">
+        <div class="expenses-total">
+          <span class="lbl">Total gastos fijos mensuales</span>
+          <span class="val" id="expMonthlyTotal">—</span>
+        </div>
+        <div class="expenses-total">
+          <span class="lbl">Total gastos fijos anuales</span>
+          <span class="val" id="expAnnualTotal">—</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUPUESTOS -->
+  <section class="block">
+    <div class="block-head">
+      <h2 class="block-title">Supuestos</h2>
+    </div>
+    <div class="assump-grid">
+      <div class="card assump-card">
+        <div class="assump-label">Margen bruto estimado</div>
+        <p class="assump-help">¿Qué porcentaje de tus ventas queda después de cubrir los costos directamente relacionados con producir/prestar el servicio?</p>
+        <div class="assump-input-row">
+          <input type="number" id="marginInput" min="0" max="100" step="0.1">
+          <span class="unit">%</span>
+        </div>
+      </div>
+      <div class="card assump-card">
+        <div class="assump-label">Crecimiento anual esperado</div>
+        <p class="assump-help">Crecimiento estimado de ventas por año.</p>
+        <div class="assump-input-row">
+          <input type="number" id="growthInput" min="-100" max="500" step="0.1">
+          <span class="unit">%</span>
+        </div>
+      </div>
+      <div class="card assump-card">
+        <div class="assump-label">Años a proyectar</div>
+        <p class="assump-help">Horizonte de la proyección de crecimiento.</p>
+        <input type="range" id="yearsSlider" min="1" max="10" step="1">
+        <div class="range-value"><span id="yearsValue">5</span> años</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- UTILIDAD ESTIMADA -->
+  <section class="block">
+    <div class="block-head">
+      <h2 class="block-title">Utilidad estimada</h2>
+    </div>
+    <div class="card profit-card">
+      <span class="estimate-tag">Estimación, no cifra contable</span>
+      <div class="profit-row"><span class="k">Ventas netas</span><span class="v" id="profitVentas">—</span></div>
+      <div class="profit-row"><span class="k">Utilidad bruta</span><span class="v" id="profitBruta">—</span></div>
+      <div class="profit-row"><span class="k">Gastos fijos</span><span class="v" id="profitGastos">—</span></div>
+      <div class="profit-row total"><span class="k">Utilidad operativa estimada</span><span class="v" id="profitOperativa">—</span></div>
+      <div class="profit-row"><span class="k">Margen operativo estimado</span><span class="v" id="profitMargen">—</span></div>
+      <p class="block-sub" style="margin-top:12px;">Esta utilidad estimada no incluye necesariamente todos los costos, impuestos, depreciaciones o intereses del negocio.</p>
+    </div>
+  </section>
+
+  <!-- PUNTO DE EQUILIBRIO + MARGEN DE SEGURIDAD -->
+  <section class="block">
+    <div class="two-col">
+      <div class="card big-stat-card">
+        <span class="big-stat-label">Punto de equilibrio</span>
+        <div>
+          <span class="big-stat-value" id="breakevenValue">—</span>
+          <span class="big-stat-unit" id="breakevenUnit"></span>
+        </div>
+        <p class="big-stat-desc" id="breakevenDesc">Necesitas vender aproximadamente esta cantidad al mes para cubrir tus gastos fijos bajo el margen estimado.</p>
+      </div>
+      <div class="card big-stat-card">
+        <span class="big-stat-label">Margen de seguridad</span>
+        <div>
+          <span class="big-stat-value" id="safetyValue">—</span>
+        </div>
+        <p class="big-stat-desc">Indica cuánto podrían caer tus ventas antes de llegar al punto de equilibrio.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROYECCION -->
+  <section class="block">
+    <div class="block-head">
+      <h2 class="block-title">Proyección</h2>
+      <p class="block-sub">Con base en tu ritmo de ventas actual, el crecimiento anual esperado, el margen bruto y tus gastos fijos.</p>
+    </div>
+    <div class="card" style="padding:16px;">
+      <div class="proj-table-wrap">
+        <table>
+          <thead>
+            <tr><th style="text-align:left;">Año</th><th>Ventas</th><th>Utilidad bruta</th><th>Gastos fijos</th><th class="pr">Utilidad estimada</th></tr>
+          </thead>
+          <tbody id="projectionBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card chart-card" style="margin-top:16px;">
+      <div class="chart-wrap" id="projectionChartWrap">
+        <canvas id="projectionChart" height="260"></canvas>
+        <div class="chart-tooltip" id="projectionTooltip"></div>
+      </div>
+      <div class="legend-row">
+        <div class="legend-item"><span class="legend-swatch line" style="background:var(--chart-primary)"></span>Ventas</div>
+        <div class="legend-item"><span class="legend-swatch line" style="background:var(--chart-good)"></span>Utilidad estimada</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ESCENARIOS -->
+  <section class="block">
+    <div class="block-head">
+      <h2 class="block-title">Análisis de escenarios</h2>
+      <p class="block-sub">Cómo cambiarían tus ventas y utilidad al final del período proyectado bajo distintos ritmos de crecimiento.</p>
+    </div>
+    <div class="scenario-grid" id="scenarioGrid"></div>
+  </section>
+
+  <!-- CONTROLES -->
+  <section class="block">
+    <div class="block-head">
+      <h2 class="block-title">Datos</h2>
+      <p class="block-sub">Tus datos se guardan automáticamente en este navegador.</p>
+    </div>
+    <div class="controls-row">
+      <button class="btn btn-danger-ghost" id="clearDataBtn">Limpiar datos</button>
+      <button class="btn btn-primary" id="loadExampleBtn">Cargar ejemplo</button>
+    </div>
+  </section>
+
+  <footer class="app-footer">Simulador financiero interno de Tymmsa · Herramienta de apoyo a la toma de decisiones</footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   CONSTANTS
+============================================================ */
+var MONTH_NAMES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+var MONTH_SHORT = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+var IVA_RATE = 0.16;
+var STORAGE_KEY = "tymmsa_simulador_state_v1";
+var THEME_KEY = "tymmsa_simulador_theme";
+var YEAR_MIN = 2023, YEAR_MAX = 2032, YEAR_DEFAULT = 2026;
+
+var mxnFmt = new Intl.NumberFormat('es-MX', {style:'currency', currency:'MXN', maximumFractionDigits:0});
+var usdFmt = new Intl.NumberFormat('en-US', {style:'currency', currency:'USD', maximumFractionDigits:0});
+var numFmt = new Intl.NumberFormat('es-MX', {maximumFractionDigits:0});
+
+function fmtMXN(n){ if(n===null||n===undefined||!isFinite(n)) return "—"; return mxnFmt.format(n) + " MXN"; }
+function fmtMXNPlain(n){ if(n===null||n===undefined||!isFinite(n)) return "—"; return mxnFmt.format(n); }
+function fmtUSD(n){ if(n===null||n===undefined||!isFinite(n)) return "—"; return usdFmt.format(n) + " USD"; }
+function fmtPct(n, digits){ if(n===null||n===undefined||!isFinite(n)) return "—"; return (n*100).toFixed(digits===undefined?1:digits) + "%"; }
+function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+function toNum(v){ var n = parseFloat(v); return isFinite(n) ? n : 0; }
+function uid(){ return 'e' + Math.random().toString(36).slice(2,10); }
+
+/* ============================================================
+   STATE
+============================================================ */
+function emptyMonths(){
+  var arr = [];
+  for(var i=0;i<12;i++){ arr.push({mxn:0, usd:0, fx:0}); }
+  return arr;
+}
+
+function defaultState(){
+  return {
+    year: YEAR_DEFAULT,
+    salesByYear: {},
+    expenses: [
+      {id:uid(), name:'Nómina', amount:0},
+      {id:uid(), name:'Renta', amount:0},
+      {id:uid(), name:'Servicios', amount:0},
+      {id:uid(), name:'Software', amount:0},
+      {id:uid(), name:'Vehículos', amount:0},
+      {id:uid(), name:'Seguros', amount:0},
+      {id:uid(), name:'Administración', amount:0}
+    ],
+    assumptions: { margin: 30, growth: 10, years: 5 }
+  };
+}
+
+function exampleState(){
+  var months = [
+    {mxn:500000, usd:10000, fx:18.20},
+    {mxn:550000, usd:12000, fx:18.45},
+    {mxn:480000, usd:9000,  fx:17.95},
+    {mxn:610000, usd:11000, fx:18.10},
+    {mxn:590000, usd:13500, fx:18.30},
+    {mxn:620000, usd:14000, fx:17.85},
+    {mxn:650000, usd:15000, fx:18.05},
+    {mxn:605000, usd:12500, fx:18.60},
+    {mxn:640000, usd:13000, fx:18.25},
+    {mxn:700000, usd:16000, fx:18.40},
+    {mxn:680000, usd:15500, fx:18.15},
+    {mxn:750000, usd:18000, fx:18.50}
+  ];
+  var s = {
+    year: YEAR_DEFAULT,
+    salesByYear: {},
+    expenses: [
+      {id:uid(), name:'Nómina', amount:130000},
+      {id:uid(), name:'Renta', amount:30000},
+      {id:uid(), name:'Servicios', amount:12000},
+      {id:uid(), name:'Software', amount:6000},
+      {id:uid(), name:'Vehículos', amount:15000},
+      {id:uid(), name:'Seguros', amount:8000},
+      {id:uid(), name:'Administración', amount:10000}
+    ],
+    assumptions: { margin: 30, growth: 10, years: 5 }
+  };
+  s.salesByYear[YEAR_DEFAULT] = months;
+  return s;
+}
+
+var state = null;
+var saveTimer = null;
+
+function loadState(){
+  try{
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return null;
+    var parsed = JSON.parse(raw);
+    if(!parsed || typeof parsed !== 'object') return null;
+    // basic shape guard
+    if(!parsed.salesByYear) parsed.salesByYear = {};
+    if(!Array.isArray(parsed.expenses)) parsed.expenses = [];
+    if(!parsed.assumptions) parsed.assumptions = {margin:30, growth:10, years:5};
+    if(!parsed.year) parsed.year = YEAR_DEFAULT;
+    return parsed;
+  }catch(e){ return null; }
+}
+
+function saveStateNow(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){ /* storage unavailable */ }
+}
+function saveStateDebounced(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveStateNow, 250);
+}
+
+function getYearMonths(year){
+  var key = String(year);
+  if(!state.salesByYear[key]){ state.salesByYear[key] = emptyMonths(); }
+  // ensure exactly 12 well-formed entries
+  var arr = state.salesByYear[key];
+  for(var i=0;i<12;i++){
+    if(!arr[i]) arr[i] = {mxn:0, usd:0, fx:0};
+  }
+  return arr;
+}
+
+/* ============================================================
+   THEME
+============================================================ */
+function initTheme(){
+  var saved = null;
+  try{ saved = localStorage.getItem(THEME_KEY); }catch(e){}
+  if(saved === 'dark' || saved === 'light'){
+    document.documentElement.setAttribute('data-theme', saved);
+  }
+  updateThemeIcon();
+}
+function currentThemeIsDark(){
+  var explicit = document.documentElement.getAttribute('data-theme');
+  if(explicit === 'dark') return true;
+  if(explicit === 'light') return false;
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+function updateThemeIcon(){
+  var dark = currentThemeIsDark();
+  document.getElementById('themeIconSun').style.display = dark ? 'none' : 'block';
+  document.getElementById('themeIconMoon').style.display = dark ? 'block' : 'none';
+}
+function toggleTheme(){
+  var dark = currentThemeIsDark();
+  var next = dark ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  try{ localStorage.setItem(THEME_KEY, next); }catch(e){}
+  updateThemeIcon();
+  // redraw charts so canvas colors match new theme
+  renderMonthlyChart();
+  renderProjectionChart();
+}
+
+/* ============================================================
+   COMPUTATION
+============================================================ */
+function computeMonthsData(months){
+  return months.map(function(m, i){
+    var mxnConIva = Math.max(0, toNum(m.mxn));
+    var usd = Math.max(0, toNum(m.usd));
+    var fx = Math.max(0, toNum(m.fx));
+    var mxnNeto = mxnConIva / (1 + IVA_RATE);
+    var iva = mxnConIva - mxnNeto;
+    var usdConvertido = usd * fx;
+    var ventasNetas = mxnNeto + usdConvertido;
+    var captured = mxnConIva > 0 || usd > 0;
+    return {index:i, mxnConIva:mxnConIva, usd:usd, fx:fx, mxnNeto:mxnNeto, iva:iva, usdConvertido:usdConvertido, ventasNetas:ventasNetas, captured:captured};
+  });
+}
+
+function computeAnnual(monthsData){
+  var sum = function(key){ return monthsData.reduce(function(a,m){ return a+m[key]; },0); };
+  var capturedCount = monthsData.filter(function(m){ return m.captured; }).length;
+  var ventasNetas = sum('ventasNetas');
+  return {
+    mxnConIva: sum('mxnConIva'),
+    mxnNeto: sum('mxnNeto'),
+    iva: sum('iva'),
+    usd: sum('usd'),
+    usdConvertido: sum('usdConvertido'),
+    ventasNetas: ventasNetas,
+    capturedCount: capturedCount,
+    promedioMensual: capturedCount > 0 ? ventasNetas / capturedCount : 0
+  };
+}
+
+function computeExpenses(){
+  var monthly = state.expenses.reduce(function(a,e){ return a + Math.max(0, toNum(e.amount)); },0);
+  return { monthly: monthly, annual: monthly*12 };
+}
+
+function computeFinancials(annual, expenses){
+  var marginFrac = clamp(toNum(state.assumptions.margin),0,100) / 100;
+  var gastosFijosCapturado = expenses.monthly * annual.capturedCount;
+  var utilidadBrutaTotal = annual.ventasNetas * marginFrac;
+  var utilidadOperativaTotal = utilidadBrutaTotal - gastosFijosCapturado;
+  var margenOperativo = annual.ventasNetas > 0 ? utilidadOperativaTotal / annual.ventasNetas : null;
+  var puntoEquilibrioMensual = marginFrac > 0 ? expenses.monthly / marginFrac : null;
+  var margenSeguridad = (puntoEquilibrioMensual !== null && annual.promedioMensual > 0)
+    ? (annual.promedioMensual - puntoEquilibrioMensual) / annual.promedioMensual
+    : null;
+  var ratioGastosVentas = annual.ventasNetas > 0 ? gastosFijosCapturado / annual.ventasNetas : null;
+  return {
+    marginFrac: marginFrac,
+    gastosFijosCapturado: gastosFijosCapturado,
+    utilidadBrutaTotal: utilidadBrutaTotal,
+    utilidadOperativaTotal: utilidadOperativaTotal,
+    margenOperativo: margenOperativo,
+    puntoEquilibrioMensual: puntoEquilibrioMensual,
+    margenSeguridad: margenSeguridad,
+    ratioGastosVentas: ratioGastosVentas
+  };
+}
+
+function computeHealth(annual, fin){
+  if(annual.capturedCount === 0){
+    return {level:'none', label:'Sin datos suficientes', desc:'Captura al menos un mes de ventas para ver tu indicador de salud.'};
+  }
+  var score = 0, max = 0;
+
+  max += 2;
+  if(fin.margenOperativo !== null){
+    if(fin.margenOperativo >= 0.15) score += 2;
+    else if(fin.margenOperativo >= 0) score += 1;
+  }
+
+  max += 2;
+  if(fin.margenSeguridad !== null){
+    if(fin.margenSeguridad >= 0.20) score += 2;
+    else if(fin.margenSeguridad >= 0) score += 1;
+  }
+
+  max += 2;
+  if(fin.ratioGastosVentas !== null){
+    if(fin.ratioGastosVentas <= 0.5) score += 2;
+    else if(fin.ratioGastosVentas <= 0.8) score += 1;
+  }
+
+  max += 2;
+  if(fin.utilidadOperativaTotal > 0) score += 2;
+  else if(fin.utilidadOperativaTotal === 0) score += 1;
+
+  var pct = max > 0 ? score/max : 0;
+
+  if(pct >= 0.7){
+    return {level:'green', label:'Saludable', desc:'Tu negocio muestra una utilidad estimada positiva, un margen de seguridad cómodo y gastos fijos bajo control respecto a tus ventas.'};
+  }
+  if(pct >= 0.4){
+    return {level:'yellow', label:'Atención', desc:'Tu negocio está funcionando, pero algunos indicadores están cerca de niveles que valdría la pena vigilar de cerca.'};
+  }
+  return {level:'red', label:'Riesgo', desc:'Varios indicadores clave están en niveles que ameritan atención inmediata: revisa margen, gastos fijos y ritmo de ventas.'};
+}
+
+function buildHowAreWeDoing(annual, expenses, fin){
+  var msgs = [];
+  if(annual.capturedCount === 0){
+    msgs.push('Aún no has capturado ventas. Agrega al menos un mes para ver el análisis.');
+    return msgs;
+  }
+
+  if(fin.puntoEquilibrioMensual !== null){
+    var ratio = annual.promedioMensual / fin.puntoEquilibrioMensual;
+    if(ratio >= 1.3){
+      msgs.push('Tus ventas actuales están cómodamente por encima de tu punto de equilibrio.');
+    } else if(ratio >= 0.9){
+      msgs.push('Tus ventas están cerca del punto de equilibrio. Un crecimiento moderado o una reducción de gastos fijos tendría un impacto importante.');
+    } else {
+      msgs.push('Tus ventas actuales no alcanzan para cubrir los gastos fijos bajo el margen estimado.');
+    }
+  } else {
+    msgs.push('No es posible calcular el punto de equilibrio con un margen de 0%.');
+  }
+
+  if(fin.marginFrac < 0.25){
+    msgs.push('Tu principal oportunidad podría estar en mejorar el margen de tus trabajos.');
+  }
+
+  if(fin.ratioGastosVentas !== null && fin.ratioGastosVentas > 0.5){
+    msgs.push('Tus gastos fijos representan una parte importante de tus ventas. Revisa qué costos pueden reducirse o hacerse variables.');
+  }
+
+  if(fin.puntoEquilibrioMensual !== null && annual.promedioMensual > fin.puntoEquilibrioMensual * 1.1 && fin.margenOperativo !== null && fin.margenOperativo < 0.10){
+    msgs.push('Tus ventas son fuertes, pero el margen estimado está limitando la rentabilidad.');
+  }
+
+  return msgs;
+}
+
+function buildRecommendations(annual, expenses, fin){
+  if(annual.capturedCount === 0) return [];
+  var candidates = [];
+
+  var marginGapScore = Math.max(0, 0.35 - fin.marginFrac) * 300;
+  if(fin.marginFrac < 0.35){
+    var impact = annual.ventasNetas * 0.05;
+    candidates.push({
+      score: marginGapScore + 10,
+      title: 'Mejorar margen',
+      text: 'Tu margen bruto actual es ' + fmtPct(fin.marginFrac,0) + '. Un aumento de 5 puntos porcentuales en tu margen representaría aproximadamente ' + fmtMXNPlain(impact) + ' adicionales de utilidad estimada.'
+    });
+  }
+
+  if(fin.margenSeguridad === null || fin.margenSeguridad < 0.20){
+    var faltante = fin.puntoEquilibrioMensual !== null ? Math.max(0, fin.puntoEquilibrioMensual - annual.promedioMensual) : null;
+    var text2 = fin.margenSeguridad === null
+      ? 'Aún no se puede calcular tu margen de seguridad con un margen bruto de 0%. Ajusta tus supuestos para ver este análisis.'
+      : (faltante > 0
+          ? 'Tu margen de seguridad es de ' + fmtPct(fin.margenSeguridad,0) + '. Incrementar tus ventas en aproximadamente ' + fmtMXNPlain(faltante) + ' al mes ampliaría considerablemente tu colchón frente al punto de equilibrio.'
+          : 'Tu margen de seguridad es de ' + fmtPct(fin.margenSeguridad,0) + '. Seguir creciendo tus ventas fortalecería aún más tu posición.');
+    candidates.push({
+      score: (fin.margenSeguridad===null ? 0.2 : Math.max(0, 0.20 - fin.margenSeguridad)) * 300 + 8,
+      title: 'Incrementar ventas',
+      text: text2
+    });
+  }
+
+  if(fin.ratioGastosVentas === null || fin.ratioGastosVentas > 0.5){
+    var text3 = fin.ratioGastosVentas === null
+      ? 'Aún no hay suficientes ventas capturadas para comparar contra tus gastos fijos.'
+      : 'Tus gastos fijos representan ' + fmtPct(fin.ratioGastosVentas,0) + ' de tus ventas netas. Reducir o volver variable una parte de estos gastos aliviaría directamente tu punto de equilibrio.';
+    candidates.push({
+      score: (fin.ratioGastosVentas===null ? 0.5 : Math.max(0, fin.ratioGastosVentas - 0.5)) * 300 + 6,
+      title: 'Reducir gastos fijos',
+      text: text3
+    });
+  }
+
+  candidates.sort(function(a,b){ return b.score - a.score; });
+  return candidates.slice(0,3);
+}
+
+/* ============================================================
+   RENDER — static-ish sections (rebuilt on year/list changes)
+============================================================ */
+function populateYearSelect(){
+  var sel = document.getElementById('yearSelect');
+  sel.innerHTML = '';
+  for(var y=YEAR_MIN;y<=YEAR_MAX;y++){
+    var opt = document.createElement('option');
+    opt.value = y;
+    opt.textContent = y;
+    if(y === state.year) opt.selected = true;
+    sel.appendChild(opt);
+  }
+}
+
+function renderMonthsTable(){
+  var tbody = document.getElementById('monthsBody');
+  tbody.innerHTML = '';
+  var months = getYearMonths(state.year);
+  for(var i=0;i<12;i++){
+    var m = months[i];
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td class="month-name">'+MONTH_NAMES[i]+'</td>'+
+      '<td><input type="number" min="0" step="any" data-index="'+i+'" data-field="mxn" value="'+(m.mxn||'')+'" placeholder="0"></td>'+
+      '<td><input type="number" min="0" step="any" data-index="'+i+'" data-field="usd" value="'+(m.usd||'')+'" placeholder="0"></td>'+
+      '<td><input type="number" min="0" step="0.01" data-index="'+i+'" data-field="fx" value="'+(m.fx||'')+'" placeholder="0.00"></td>'+
+      '<td class="computed-cell" id="mNeto'+i+'">—</td>'+
+      '<td class="computed-cell" id="mUsdMxn'+i+'">—</td>'+
+      '<td class="computed-cell total pr" id="mTotal'+i+'">—</td>';
+    tbody.appendChild(tr);
+  }
+}
+
+function renderExpensesRows(){
+  var list = document.getElementById('expensesList');
+  list.innerHTML = '';
+  state.expenses.forEach(function(exp){
+    var row = document.createElement('div');
+    row.className = 'expense-row';
+    row.setAttribute('data-id', exp.id);
+    row.innerHTML =
+      '<input type="text" data-field="name" value="'+escapeHtml(exp.name)+'" placeholder="Concepto">'+
+      '<input type="number" data-field="amount" min="0" step="any" value="'+(exp.amount||'')+'" placeholder="0">'+
+      '<button class="remove-btn" title="Eliminar gasto" data-action="remove">×</button>';
+    list.appendChild(row);
+  });
+}
+
+function escapeHtml(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+/* ============================================================
+   RENDER — derived (recomputed on every change)
+============================================================ */
+var lastAnnual = null, lastFin = null, lastMonthsData = null, lastExpenses = null;
+
+function renderDerived(){
+  var months = getYearMonths(state.year);
+  var monthsData = computeMonthsData(months);
+  var annual = computeAnnual(monthsData);
+  var expenses = computeExpenses();
+  var fin = computeFinancials(annual, expenses);
+  var health = computeHealth(annual, fin);
+
+  lastAnnual = annual; lastFin = fin; lastMonthsData = monthsData; lastExpenses = expenses;
+
+  renderMonthRowComputed(monthsData);
+  renderCapturedNotice(annual);
+  renderAnnualSummary(annual);
+  renderExpenseTotals(expenses);
+  renderDashboard(annual, expenses, fin, health);
+  renderHealth(health);
+  renderHowList(annual, expenses, fin);
+  renderImproveList(annual, expenses, fin);
+  renderProfit(annual, expenses, fin);
+  renderBreakeven(fin);
+  renderSafety(fin);
+  renderMonthlyChart();
+  renderProjection(annual, expenses, fin);
+  renderScenarios(annual, expenses, fin);
+
+  saveStateDebounced();
+}
+
+function renderMonthRowComputed(monthsData){
+  monthsData.forEach(function(m,i){
+    var netoEl = document.getElementById('mNeto'+i);
+    var usdMxnEl = document.getElementById('mUsdMxn'+i);
+    var totalEl = document.getElementById('mTotal'+i);
+    if(netoEl) netoEl.textContent = fmtMXNPlain(m.mxnNeto);
+    if(usdMxnEl) usdMxnEl.textContent = fmtMXNPlain(m.usdConvertido);
+    if(totalEl) totalEl.textContent = fmtMXNPlain(m.ventasNetas);
+  });
+}
+
+function renderCapturedNotice(annual){
+  var el = document.getElementById('capturedNotice');
+  if(annual.capturedCount < 12){
+    el.style.display = 'flex';
+    el.innerHTML = '<span>Meses capturados: <strong>'+annual.capturedCount+' de 12</strong>. Las cifras anuales reflejan únicamente los meses capturados.'+
+      (annual.capturedCount>0 ? ' Promedio mensual actual: <strong>'+fmtMXNPlain(annual.promedioMensual)+'</strong>.' : '')+'</span>';
+  } else {
+    el.style.display = 'flex';
+    el.className = 'notice info';
+    el.innerHTML = '<span>Meses capturados: <strong>12 de 12</strong>. Promedio mensual actual: <strong>'+fmtMXNPlain(annual.promedioMensual)+'</strong>.</span>';
+  }
+}
+
+function renderAnnualSummary(annual){
+  var el = document.getElementById('annualSummary');
+  var cards = [
+    ['Ventas MXN con IVA', fmtMXNPlain(annual.mxnConIva)],
+    ['Ventas MXN sin IVA', fmtMXNPlain(annual.mxnNeto)],
+    ['IVA', fmtMXNPlain(annual.iva)],
+    ['Ventas USD', usdFmt.format(annual.usd)],
+    ['Ventas USD convertidas a MXN', fmtMXNPlain(annual.usdConvertido)],
+    ['Ventas netas totales en MXN', fmtMXNPlain(annual.ventasNetas)]
+  ];
+  el.innerHTML = cards.map(function(c){
+    return '<div class="card summary-card"><div class="summary-label">'+c[0]+'</div><div class="summary-value">'+c[1]+'</div></div>';
+  }).join('');
+}
+
+function renderExpenseTotals(expenses){
+  document.getElementById('expMonthlyTotal').textContent = fmtMXNPlain(expenses.monthly);
+  document.getElementById('expAnnualTotal').textContent = fmtMXNPlain(expenses.annual);
+}
+
+function renderDashboard(annual, expenses, fin, health){
+  var el = document.getElementById('dashboardCards');
+  function cls(v, goodMin, warnMin){
+    if(v===null||v===undefined) return '';
+    if(v>=goodMin) return 'good';
+    if(v>=warnMin) return 'warn';
+    return 'bad';
+  }
+  var cards = [];
+  cards.push({label:'Ventas netas', value: fmtMXNPlain(annual.ventasNetas), note: annual.capturedCount+' / 12 meses'});
+  cards.push({label:'Utilidad estimada', value: fmtMXNPlain(fin.utilidadOperativaTotal), note:'periodo capturado', extraClass: fin.utilidadOperativaTotal>=0?'good':'bad'});
+  cards.push({label:'Margen operativo', value: fmtPct(fin.margenOperativo,1), note:'sobre ventas netas', extraClass: cls(fin.margenOperativo,0.15,0)});
+  cards.push({label:'Punto de equilibrio', value: fin.puntoEquilibrioMensual!==null ? fmtMXNPlain(fin.puntoEquilibrioMensual) : 'N/D', note:'por mes'});
+  cards.push({label:'Gastos fijos', value: fmtMXNPlain(expenses.monthly), note:'por mes'});
+  cards.push({label:'Margen de seguridad', value: fmtPct(fin.margenSeguridad,1), note:'vs. punto de equilibrio', extraClass: cls(fin.margenSeguridad,0.2,0)});
+
+  el.innerHTML = cards.map(function(c){
+    return '<div class="card kpi-card">'+
+      '<span class="kpi-label">'+c.label+'</span>'+
+      '<span class="kpi-value '+(c.extraClass||'')+'">'+c.value+'</span>'+
+      '<span class="kpi-note">'+c.note+'</span>'+
+    '</div>';
+  }).join('');
+}
+
+function renderHealth(health){
+  var dot = document.getElementById('healthDot');
+  var label = document.getElementById('healthLabel');
+  var desc = document.getElementById('healthDesc');
+  dot.className = 'health-dot ' + health.level;
+  label.className = 'health-label ' + health.level;
+  var emoji = health.level==='green' ? '🟢' : health.level==='yellow' ? '🟡' : health.level==='red' ? '🔴' : '⚪️';
+  dot.textContent = emoji;
+  label.textContent = health.label;
+  desc.textContent = health.desc;
+}
+
+function renderHowList(annual, expenses, fin){
+  var el = document.getElementById('howList');
+  var msgs = buildHowAreWeDoing(annual, expenses, fin);
+  el.innerHTML = msgs.map(function(m){
+    return '<li class="insight-item"><span class="insight-dot"></span><span class="insight-text">'+m+'</span></li>';
+  }).join('');
+}
+
+function renderImproveList(annual, expenses, fin){
+  var el = document.getElementById('improveList');
+  var recs = buildRecommendations(annual, expenses, fin);
+  if(recs.length === 0){
+    el.innerHTML = '<div class="card improve-card"><div class="improve-title">Todo en orden</div><div class="improve-text">Con los datos capturados no se detectan focos rojos prioritarios. Sigue monitoreando tus ventas y gastos.</div></div>';
+    return;
+  }
+  el.innerHTML = recs.map(function(r,i){
+    return '<div class="card improve-card">'+
+      '<span class="improve-rank">'+(i+1)+'</span>'+
+      '<div class="improve-title">'+r.title+'</div>'+
+      '<div class="improve-text">'+r.text+'</div>'+
+    '</div>';
+  }).join('');
+}
+
+function renderProfit(annual, expenses, fin){
+  document.getElementById('profitVentas').textContent = fmtMXNPlain(annual.ventasNetas);
+  document.getElementById('profitBruta').textContent = fmtMXNPlain(fin.utilidadBrutaTotal);
+  document.getElementById('profitGastos').textContent = fmtMXNPlain(fin.gastosFijosCapturado);
+  var opEl = document.getElementById('profitOperativa');
+  opEl.textContent = fmtMXNPlain(fin.utilidadOperativaTotal);
+  opEl.style.color = fin.utilidadOperativaTotal >= 0 ? 'var(--good)' : 'var(--bad)';
+  document.getElementById('profitMargen').textContent = fmtPct(fin.margenOperativo,1);
+}
+
+function renderBreakeven(fin){
+  var valueEl = document.getElementById('breakevenValue');
+  var unitEl = document.getElementById('breakevenUnit');
+  var descEl = document.getElementById('breakevenDesc');
+  if(fin.puntoEquilibrioMensual === null){
+    valueEl.textContent = 'N/D';
+    unitEl.textContent = '';
+    descEl.textContent = 'No es posible calcular el punto de equilibrio con un margen de 0%.';
+  } else {
+    valueEl.textContent = fmtMXNPlain(fin.puntoEquilibrioMensual);
+    unitEl.textContent = '/ mes';
+    descEl.textContent = 'Necesitas vender aproximadamente esta cantidad al mes para cubrir tus gastos fijos bajo el margen estimado.';
+  }
+}
+
+function renderSafety(fin){
+  var el = document.getElementById('safetyValue');
+  el.textContent = fmtPct(fin.margenSeguridad,1);
+  el.style.color = fin.margenSeguridad===null ? '' : (fin.margenSeguridad>=0 ? 'var(--good)' : 'var(--bad)');
+}
+
+/* ============================================================
+   CHARTS
+============================================================ */
+function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+function setupHiDPICanvas(canvas, cssHeight){
+  var dpr = window.devicePixelRatio || 1;
+  var parent = canvas.parentElement;
+  var cssWidth = parent.clientWidth;
+  canvas.width = Math.max(1, Math.floor(cssWidth*dpr));
+  canvas.height = Math.max(1, Math.floor(cssHeight*dpr));
+  canvas.style.width = cssWidth+'px';
+  canvas.style.height = cssHeight+'px';
+  var ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx:ctx, width:cssWidth, height:cssHeight};
+}
+
+var monthlyChartLayout = null;
+
+function renderMonthlyChart(){
+  var canvas = document.getElementById('monthlyChart');
+  if(!canvas || !lastMonthsData) return;
+  var cssHeight = 280;
+  var setup = setupHiDPICanvas(canvas, cssHeight);
+  var ctx = setup.ctx, width = setup.width, height = cssHeight;
+
+  var padding = {top:16, right:16, bottom:28, left:64};
+  var chartW = width - padding.left - padding.right;
+  var chartH = height - padding.top - padding.bottom;
+
+  var monthlyExpenses = lastExpenses.monthly;
+  var breakeven = lastFin.puntoEquilibrioMensual;
+  var margin = lastFin.marginFrac;
+
+  var utilidades = lastMonthsData.map(function(m){ return m.ventasNetas*margin - monthlyExpenses; });
+  var maxVal = Math.max(
+    1,
+    Math.max.apply(null, lastMonthsData.map(function(m){ return m.ventasNetas; })),
+    breakeven || 0,
+    monthlyExpenses,
+    Math.max.apply(null, utilidades)
+  );
+  var minVal = Math.min(0, Math.min.apply(null, utilidades));
+  var range = maxVal - minVal || 1;
+
+  function yForVal(v){
+    return padding.top + chartH - ((v - minVal)/range)*chartH;
+  }
+
+  ctx.clearRect(0,0,width,height);
+
+  var gridColor = cssVar('--chart-grid');
+  var textColor = cssVar('--chart-text');
+  var primary = cssVar('--chart-primary');
+  var goodColor = cssVar('--chart-good');
+  var badColor = cssVar('--chart-bad');
+  var secondary = cssVar('--chart-secondary');
+  var warnColor = cssVar('--chart-warn');
+
+  // horizontal grid lines (4 steps)
+  ctx.strokeStyle = gridColor;
+  ctx.lineWidth = 1;
+  ctx.font = '11px -apple-system, sans-serif';
+  ctx.fillStyle = textColor;
+  var steps = 4;
+  for(var s=0;s<=steps;s++){
+    var v = minVal + (range*s/steps);
+    var y = yForVal(v);
+    ctx.beginPath();
+    ctx.moveTo(padding.left, y);
+    ctx.lineTo(width-padding.right, y);
+    ctx.stroke();
+    ctx.textAlign = 'right';
+    ctx.fillText(numFmt.format(Math.round(v/1000))+'k', padding.left-8, y+3);
+  }
+
+  var n = 12;
+  var slot = chartW / n;
+  var barW = Math.min(28, slot*0.5);
+
+  var bars = [];
+  for(var i=0;i<n;i++){
+    var cx = padding.left + slot*i + slot/2;
+    var m = lastMonthsData[i];
+    var barX = cx - barW/2;
+    var barTop = yForVal(m.ventasNetas);
+    var barBottom = yForVal(0);
+    ctx.fillStyle = primary;
+    ctx.globalAlpha = 0.85;
+    ctx.fillRect(barX, Math.min(barTop,barBottom), barW, Math.abs(barBottom-barTop));
+    ctx.globalAlpha = 1;
+    bars.push({cx:cx, x0:padding.left+slot*i, x1:padding.left+slot*(i+1)});
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = textColor;
+    ctx.fillText(MONTH_SHORT[i], cx, height-padding.bottom+18);
+  }
+
+  // gastos fijos flat line
+  ctx.setLineDash([5,4]);
+  ctx.strokeStyle = secondary;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  var yGastos = yForVal(monthlyExpenses);
+  ctx.moveTo(padding.left, yGastos);
+  ctx.lineTo(width-padding.right, yGastos);
+  ctx.stroke();
+
+  // breakeven flat line
+  if(breakeven !== null){
+    ctx.strokeStyle = warnColor;
+    ctx.beginPath();
+    var yBE = yForVal(breakeven);
+    ctx.moveTo(padding.left, yBE);
+    ctx.lineTo(width-padding.right, yBE);
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  // utilidad estimada line
+  ctx.strokeStyle = goodColor;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for(var j=0;j<n;j++){
+    var px = bars[j].cx;
+    var py = yForVal(utilidades[j]);
+    if(j===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+  }
+  ctx.stroke();
+
+  ctx.fillStyle = goodColor;
+  for(var k=0;k<n;k++){
+    var px2 = bars[k].cx;
+    var py2 = yForVal(utilidades[k]);
+    ctx.beginPath();
+    ctx.arc(px2,py2,3,0,Math.PI*2);
+    ctx.fill();
+  }
+
+  monthlyChartLayout = {bars:bars, monthlyExpenses:monthlyExpenses, breakeven:breakeven, utilidades:utilidades, padding:padding, width:width, height:height};
+}
+
+function attachMonthlyChartTooltip(){
+  var canvas = document.getElementById('monthlyChart');
+  var tooltip = document.getElementById('monthlyTooltip');
+  var wrap = document.getElementById('monthlyChartWrap');
+  canvas.addEventListener('mousemove', function(e){
+    if(!monthlyChartLayout || !lastMonthsData) return;
+    var rect = canvas.getBoundingClientRect();
+    var x = e.clientX - rect.left;
+    var idx = -1;
+    for(var i=0;i<monthlyChartLayout.bars.length;i++){
+      if(x >= monthlyChartLayout.bars[i].x0 && x < monthlyChartLayout.bars[i].x1){ idx = i; break; }
+    }
+    if(idx === -1){ tooltip.style.opacity = 0; return; }
+    var m = lastMonthsData[idx];
+    var u = monthlyChartLayout.utilidades[idx];
+    tooltip.innerHTML =
+      '<div class="tt-title">'+MONTH_NAMES[idx]+'</div>'+
+      '<div class="tt-row"><span class="k"><span class="tt-swatch" style="background:var(--chart-primary)"></span>Ventas netas</span><span>'+fmtMXNPlain(m.ventasNetas)+'</span></div>'+
+      '<div class="tt-row"><span class="k"><span class="tt-swatch" style="background:var(--chart-good)"></span>Utilidad est.</span><span>'+fmtMXNPlain(u)+'</span></div>'+
+      '<div class="tt-row"><span class="k"><span class="tt-swatch" style="background:var(--chart-secondary)"></span>Gastos fijos</span><span>'+fmtMXNPlain(monthlyChartLayout.monthlyExpenses)+'</span></div>'+
+      (monthlyChartLayout.breakeven!==null ? '<div class="tt-row"><span class="k"><span class="tt-swatch" style="background:var(--chart-warn)"></span>P. equilibrio</span><span>'+fmtMXNPlain(monthlyChartLayout.breakeven)+'</span></div>' : '');
+    var left = monthlyChartLayout.bars[idx].cx;
+    var maxLeft = wrap.clientWidth - 190;
+    tooltip.style.left = Math.min(left+10, Math.max(0,maxLeft)) + 'px';
+    tooltip.style.top = '10px';
+    tooltip.style.opacity = 1;
+  });
+  canvas.addEventListener('mouseleave', function(){ tooltip.style.opacity = 0; });
+}
+
+/* Projection */
+var lastProjectionRows = null;
+var projectionChartLayout = null;
+
+function getProjectionRows(annual, expenses){
+  var years = clamp(Math.round(toNum(state.assumptions.years)),1,10);
+  var growth = clamp(toNum(state.assumptions.growth), -100, 500) / 100;
+  var margin = clamp(toNum(state.assumptions.margin),0,100) / 100;
+  var baseAnnualSales = annual.capturedCount > 0 ? annual.promedioMensual*12 : 0;
+  var gastosAnual = expenses.annual;
+  var rows = [];
+  var sales = baseAnnualSales;
+  for(var y=0;y<years;y++){
+    if(y>0) sales = Math.max(0, sales*(1+growth));
+    var utilidadBruta = sales*margin;
+    var utilidadEstimada = utilidadBruta - gastosAnual;
+    rows.push({year: state.year+y, sales:sales, utilidadBruta:utilidadBruta, gastos:gastosAnual, utilidadEstimada:utilidadEstimada});
+  }
+  return rows;
+}
+
+function renderProjection(annual, expenses, fin){
+  var rows = getProjectionRows(annual, expenses);
+  lastProjectionRows = rows;
+  var tbody = document.getElementById('projectionBody');
+  tbody.innerHTML = rows.map(function(r){
+    return '<tr>'+
+      '<td style="text-align:left;font-weight:600;">'+r.year+'</td>'+
+      '<td class="computed-cell">'+fmtMXNPlain(r.sales)+'</td>'+
+      '<td class="computed-cell">'+fmtMXNPlain(r.utilidadBruta)+'</td>'+
+      '<td class="computed-cell">'+fmtMXNPlain(r.gastos)+'</td>'+
+      '<td class="computed-cell total pr" style="color:'+(r.utilidadEstimada>=0?'var(--good)':'var(--bad)')+'">'+fmtMXNPlain(r.utilidadEstimada)+'</td>'+
+    '</tr>';
+  }).join('');
+  renderProjectionChart();
+}
+
+function renderProjectionChart(){
+  var canvas = document.getElementById('projectionChart');
+  if(!canvas || !lastProjectionRows || lastProjectionRows.length===0) return;
+  var cssHeight = 260;
+  var setup = setupHiDPICanvas(canvas, cssHeight);
+  var ctx = setup.ctx, width = setup.width, height = cssHeight;
+  var padding = {top:16, right:16, bottom:28, left:70};
+  var chartW = width - padding.left - padding.right;
+  var chartH = height - padding.top - padding.bottom;
+
+  var rows = lastProjectionRows;
+  var maxVal = Math.max.apply(null, rows.map(function(r){ return r.sales; }).concat([1]));
+  var minVal = Math.min(0, Math.min.apply(null, rows.map(function(r){ return r.utilidadEstimada; })));
+  var range = (maxVal-minVal) || 1;
+
+  function yForVal(v){ return padding.top + chartH - ((v-minVal)/range)*chartH; }
+  function xForIdx(i){ return rows.length>1 ? padding.left + (chartW*i/(rows.length-1)) : padding.left+chartW/2; }
+
+  ctx.clearRect(0,0,width,height);
+  var gridColor = cssVar('--chart-grid');
+  var textColor = cssVar('--chart-text');
+  var primary = cssVar('--chart-primary');
+  var goodColor = cssVar('--chart-good');
+  var badColor = cssVar('--chart-bad');
+
+  ctx.strokeStyle = gridColor;
+  ctx.lineWidth = 1;
+  ctx.font = '11px -apple-system, sans-serif';
+  var steps = 4;
+  for(var s=0;s<=steps;s++){
+    var v = minVal + range*s/steps;
+    var y = yForVal(v);
+    ctx.beginPath(); ctx.moveTo(padding.left,y); ctx.lineTo(width-padding.right,y); ctx.stroke();
+    ctx.fillStyle = textColor; ctx.textAlign='right';
+    ctx.fillText(numFmt.format(Math.round(v/1000))+'k', padding.left-8, y+3);
+  }
+
+  var pts = [];
+  rows.forEach(function(r,i){ pts.push({x:xForIdx(i), ySales:yForVal(r.sales), yUtil:yForVal(r.utilidadEstimada)}); });
+
+  function drawLine(key, color){
+    ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.beginPath();
+    pts.forEach(function(p,i){ if(i===0) ctx.moveTo(p.x,p[key]); else ctx.lineTo(p.x,p[key]); });
+    ctx.stroke();
+    ctx.fillStyle = color;
+    pts.forEach(function(p){ ctx.beginPath(); ctx.arc(p.x,p[key],3.5,0,Math.PI*2); ctx.fill(); });
+  }
+  drawLine('ySales', primary);
+  drawLine('yUtil', goodColor);
+
+  ctx.fillStyle = textColor; ctx.textAlign='center';
+  rows.forEach(function(r,i){ ctx.fillText(String(r.year), xForIdx(i), height-padding.bottom+18); });
+
+  projectionChartLayout = {pts:pts, rows:rows};
+}
+
+function attachProjectionChartTooltip(){
+  var canvas = document.getElementById('projectionChart');
+  var tooltip = document.getElementById('projectionTooltip');
+  var wrap = document.getElementById('projectionChartWrap');
+  canvas.addEventListener('mousemove', function(e){
+    if(!projectionChartLayout) return;
+    var rect = canvas.getBoundingClientRect();
+    var x = e.clientX - rect.left;
+    var closest = 0, minDist = Infinity;
+    projectionChartLayout.pts.forEach(function(p,i){
+      var d = Math.abs(p.x-x);
+      if(d<minDist){ minDist=d; closest=i; }
+    });
+    var r = projectionChartLayout.rows[closest];
+    tooltip.innerHTML =
+      '<div class="tt-title">'+r.year+'</div>'+
+      '<div class="tt-row"><span class="k"><span class="tt-swatch" style="background:var(--chart-primary)"></span>Ventas</span><span>'+fmtMXNPlain(r.sales)+'</span></div>'+
+      '<div class="tt-row"><span class="k"><span class="tt-swatch" style="background:var(--chart-good)"></span>Utilidad est.</span><span>'+fmtMXNPlain(r.utilidadEstimada)+'</span></div>';
+    var maxLeft = wrap.clientWidth - 190;
+    tooltip.style.left = Math.min(projectionChartLayout.pts[closest].x+10, Math.max(0,maxLeft)) + 'px';
+    tooltip.style.top = '10px';
+    tooltip.style.opacity = 1;
+  });
+  canvas.addEventListener('mouseleave', function(){ tooltip.style.opacity = 0; });
+}
+
+/* Scenarios */
+function computeScenario(baseAnnualSales, growthPct, years, marginFrac, gastosAnual){
+  var g = clamp(growthPct,-100,500)/100;
+  g = Math.max(g,-0.95);
+  var sales = baseAnnualSales;
+  for(var y=1;y<years;y++){ sales = Math.max(0, sales*(1+g)); }
+  var utilidadBruta = sales*marginFrac;
+  var utilidad = utilidadBruta - gastosAnual;
+  return {sales:sales, utilidad:utilidad, growth:g};
+}
+
+function renderScenarios(annual, expenses, fin){
+  var el = document.getElementById('scenarioGrid');
+  var years = clamp(Math.round(toNum(state.assumptions.years)),1,10);
+  var growth = toNum(state.assumptions.growth);
+  var margin = fin.marginFrac;
+  var baseAnnualSales = annual.capturedCount > 0 ? annual.promedioMensual*12 : 0;
+  var finalYear = state.year + years - 1;
+
+  var scenarios = [
+    {key:'cons', name:'Conservador', growth: growth-5},
+    {key:'base', name:'Base', growth: growth},
+    {key:'opt', name:'Optimista', growth: growth+5}
+  ];
+
+  el.innerHTML = scenarios.map(function(sc){
+    var res = computeScenario(baseAnnualSales, sc.growth, years, margin, expenses.annual);
+    return '<div class="card scenario-card '+(sc.key==='base'?'base':'')+'">'+
+      '<div class="scenario-name">'+sc.name+'</div>'+
+      '<div class="scenario-metric"><div class="lbl">Ventas en '+finalYear+'</div><div class="val">'+fmtMXNPlain(res.sales)+'</div></div>'+
+      '<div class="scenario-metric"><div class="lbl">Utilidad estimada en '+finalYear+'</div><div class="val" style="color:'+(res.utilidad>=0?'var(--good)':'var(--bad)')+'">'+fmtMXNPlain(res.utilidad)+'</div></div>'+
+      '<div class="scenario-growth">Crecimiento anual: '+sc.growth.toFixed(1)+'%</div>'+
+    '</div>';
+  }).join('');
+}
+
+/* ============================================================
+   EVENTS
+============================================================ */
+function attachEvents(){
+  document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+  document.getElementById('yearSelect').addEventListener('change', function(e){
+    state.year = parseInt(e.target.value,10) || YEAR_DEFAULT;
+    renderMonthsTable();
+    renderDerived();
+  });
+
+  // Months table — delegated input, only updates state + computed cells (inputs untouched -> focus preserved)
+  document.getElementById('monthsBody').addEventListener('input', function(e){
+    var el = e.target;
+    if(el.tagName !== 'INPUT') return;
+    var idx = parseInt(el.dataset.index,10);
+    var field = el.dataset.field;
+    var months = getYearMonths(state.year);
+    var raw = parseFloat(el.value);
+    months[idx][field] = isFinite(raw) ? Math.max(0, raw) : 0;
+    renderDerived();
+  });
+  document.getElementById('monthsBody').addEventListener('blur', function(e){
+    var el = e.target;
+    if(el.tagName !== 'INPUT') return;
+    var raw = parseFloat(el.value);
+    if(el.value !== '' && (!isFinite(raw) || raw < 0)){
+      el.value = '';
+    }
+  }, true);
+
+  // Expenses — delegated input for edits, click for remove
+  var expensesList = document.getElementById('expensesList');
+  expensesList.addEventListener('input', function(e){
+    var el = e.target;
+    if(el.tagName !== 'INPUT') return;
+    var row = el.closest('.expense-row');
+    var id = row.getAttribute('data-id');
+    var exp = state.expenses.find(function(x){ return x.id===id; });
+    if(!exp) return;
+    if(el.dataset.field === 'name'){
+      exp.name = el.value;
+    } else if(el.dataset.field === 'amount'){
+      var raw = parseFloat(el.value);
+      exp.amount = isFinite(raw) ? Math.max(0, raw) : 0;
+    }
+    renderDerived();
+  });
+  expensesList.addEventListener('click', function(e){
+    var btn = e.target.closest('[data-action="remove"]');
+    if(!btn) return;
+    var row = btn.closest('.expense-row');
+    var id = row.getAttribute('data-id');
+    state.expenses = state.expenses.filter(function(x){ return x.id!==id; });
+    renderExpensesRows();
+    renderDerived();
+  });
+
+  document.getElementById('addExpenseBtn').addEventListener('click', function(){
+    state.expenses.push({id:uid(), name:'', amount:0});
+    renderExpensesRows();
+    renderDerived();
+    var rows = expensesList.querySelectorAll('.expense-row');
+    var last = rows[rows.length-1];
+    if(last){ var inp = last.querySelector('input[data-field="name"]'); if(inp) inp.focus(); }
+  });
+
+  // Assumptions
+  document.getElementById('marginInput').addEventListener('input', function(e){
+    var raw = parseFloat(e.target.value);
+    state.assumptions.margin = isFinite(raw) ? clamp(raw,0,100) : 0;
+    renderDerived();
+  });
+  document.getElementById('growthInput').addEventListener('input', function(e){
+    var raw = parseFloat(e.target.value);
+    state.assumptions.growth = isFinite(raw) ? clamp(raw,-100,500) : 0;
+    renderDerived();
+  });
+  document.getElementById('yearsSlider').addEventListener('input', function(e){
+    var raw = parseInt(e.target.value,10);
+    state.assumptions.years = isFinite(raw) ? clamp(raw,1,10) : 5;
+    document.getElementById('yearsValue').textContent = state.assumptions.years;
+    renderDerived();
+  });
+
+  // Controls
+  document.getElementById('clearDataBtn').addEventListener('click', function(){
+    var ok = window.confirm('¿Seguro que quieres borrar todos los datos? Esta acción no se puede deshacer.');
+    if(!ok) return;
+    state = defaultState();
+    state.year = YEAR_DEFAULT;
+    fullRerender();
+  });
+
+  document.getElementById('loadExampleBtn').addEventListener('click', function(){
+    var ok = window.confirm('¿Cargar datos de ejemplo? Esto reemplazará los datos actuales.');
+    if(!ok) return;
+    state = exampleState();
+    fullRerender();
+  });
+
+  window.addEventListener('resize', debounce(function(){
+    renderMonthlyChart();
+    renderProjectionChart();
+  }, 150));
+
+  attachMonthlyChartTooltip();
+  attachProjectionChartTooltip();
+}
+
+function debounce(fn, wait){
+  var t;
+  return function(){
+    var args = arguments;
+    clearTimeout(t);
+    t = setTimeout(function(){ fn.apply(null,args); }, wait);
+  };
+}
+
+/* ============================================================
+   INIT
+============================================================ */
+function fullRerender(){
+  populateYearSelect();
+  renderMonthsTable();
+  renderExpensesRows();
+  document.getElementById('marginInput').value = state.assumptions.margin;
+  document.getElementById('growthInput').value = state.assumptions.growth;
+  document.getElementById('yearsSlider').value = state.assumptions.years;
+  document.getElementById('yearsValue').textContent = state.assumptions.years;
+  renderDerived();
+}
+
+function init(){
+  initTheme();
+  var loaded = loadState();
+  state = loaded || exampleState();
+  fullRerender();
+  attachEvents();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+})();
+</script>
+</body>
+</html>
